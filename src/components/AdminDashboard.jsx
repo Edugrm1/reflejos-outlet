@@ -88,6 +88,7 @@ const emptyForm = () => ({
   stock: '0',
   medidas: '',
   sucursal: '',
+  descripcion: '',
 })
 
 /**
@@ -219,6 +220,7 @@ const AdminDashboard = () => {
       stock: String(parseStock(m)),
       medidas: m.medidas ?? m.medida ?? m.size ?? '',
       sucursal: m.sucursal ?? '',
+      descripcion: m.descripcion ?? m.description ?? m.detalle ?? '',
     })
     setImageFile(null)
     setShowProductModal(true)
@@ -239,6 +241,7 @@ const AdminDashboard = () => {
     try {
       const precioNum = Number(String(form.precio).replace(/,/g, ''))
       const stockNum = Math.max(0, Math.floor(Number(form.stock) || 0))
+      const descripcion = form.descripcion.trim()
       const payload = {
         nombre: form.nombre.trim(),
         sku: form.sku.trim() || undefined,
@@ -247,6 +250,7 @@ const AdminDashboard = () => {
         stock: stockNum,
         medidas: form.medidas.trim() || undefined,
         sucursal: form.sucursal.trim() || undefined,
+        descripcion,
       }
 
       let imagenUrl
@@ -635,6 +639,15 @@ const AdminDashboard = () => {
                   value={form.medidas}
                   onChange={(e) => setForm((f) => ({ ...f, medidas: e.target.value }))}
                   className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100"
+                />
+              </Field>
+              <Field label="Descripción">
+                <textarea
+                  value={form.descripcion}
+                  onChange={(e) => setForm((f) => ({ ...f, descripcion: e.target.value }))}
+                  rows={5}
+                  placeholder="Texto que verán los clientes en la ficha del producto. Deja vacío para usar el texto sugerido por defecto."
+                  className="mt-1 w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-100 dark:placeholder:text-zinc-500"
                 />
               </Field>
               <Field label="Sucursal">
