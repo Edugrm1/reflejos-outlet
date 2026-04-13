@@ -105,21 +105,49 @@ const ProductDetail = () => {
   const [mainSrc, setMainSrc] = useState(optimizedMainSrc)
 
   useEffect(() => {
-    setMainSrc(optimizedMainSrc)
-  }, [optimizedMainSrc])
+    let cancelled = false
 
-  useEffect(() => {
-    setMainLoaded(false)
-  }, [mainSrc])
-
-  const handleMainImageError = () => {
-    if (mainSrc !== rawMainSrc && rawMainSrc) {
-      setMainSrc(rawMainSrc)
-      setMainLoaded(false)
-      return
+    if (!optimizedMainSrc) {
+      setMainSrc('')
+      setMainLoaded(true)
+      return () => {
+        cancelled = true
+      }
     }
-    setMainLoaded(true)
-  }
+
+    setMainLoaded(false)
+
+    const loadCandidate = (src, onError) => {
+      const img = new window.Image()
+      img.onload = () => {
+        if (cancelled) return
+        setMainSrc(src)
+        setMainLoaded(true)
+      }
+      img.onerror = () => {
+        if (cancelled) return
+        onError?.()
+      }
+      img.src = src
+    }
+
+    loadCandidate(optimizedMainSrc, () => {
+      if (rawMainSrc && rawMainSrc !== optimizedMainSrc) {
+        loadCandidate(rawMainSrc, () => {
+          if (cancelled) return
+          setMainSrc(rawMainSrc)
+          setMainLoaded(true)
+        })
+        return
+      }
+      setMainSrc(optimizedMainSrc)
+      setMainLoaded(true)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [optimizedMainSrc, rawMainSrc])
 
   const nombre = product?.nombre ?? product?.name ?? 'Espejo'
   const categoriaRaw = product?.categoria ?? product?.category ?? 'otros'
@@ -255,6 +283,7 @@ const ProductDetail = () => {
                         />
                       )}
                       <img
+                        key={mainSrc}
                         src={mainSrc}
                         alt={nombre}
                         className={`relative z-[1] h-full w-full object-cover transition-opacity duration-300 ${
@@ -263,8 +292,6 @@ const ProductDetail = () => {
                         loading="eager"
                         fetchPriority="high"
                         decoding="async"
-                        onLoad={() => setMainLoaded(true)}
-                        onError={handleMainImageError}
                       />
                     </>
                   ) : (

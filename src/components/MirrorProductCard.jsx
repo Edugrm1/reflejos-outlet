@@ -70,18 +70,49 @@ const MirrorProductCard = ({ mirror, variant = 'default' }) => {
   const [currentImageSrc, setCurrentImageSrc] = useState(optimizedImageSrc)
 
   useEffect(() => {
-    setCurrentImageSrc(optimizedImageSrc)
-    setImageLoaded(!optimizedImageSrc)
-  }, [optimizedImageSrc])
+    let cancelled = false
 
-  const handleImageError = () => {
-    if (currentImageSrc !== rawImageSrc && rawImageSrc) {
-      setCurrentImageSrc(rawImageSrc)
-      setImageLoaded(false)
-      return
+    if (!optimizedImageSrc) {
+      setCurrentImageSrc('')
+      setImageLoaded(true)
+      return () => {
+        cancelled = true
+      }
     }
-    setImageLoaded(true)
-  }
+
+    setImageLoaded(false)
+
+    const loadCandidate = (src, onError) => {
+      const img = new window.Image()
+      img.onload = () => {
+        if (cancelled) return
+        setCurrentImageSrc(src)
+        setImageLoaded(true)
+      }
+      img.onerror = () => {
+        if (cancelled) return
+        onError?.()
+      }
+      img.src = src
+    }
+
+    loadCandidate(optimizedImageSrc, () => {
+      if (rawImageSrc && rawImageSrc !== optimizedImageSrc) {
+        loadCandidate(rawImageSrc, () => {
+          if (cancelled) return
+          setCurrentImageSrc(rawImageSrc)
+          setImageLoaded(true)
+        })
+        return
+      }
+      setCurrentImageSrc(optimizedImageSrc)
+      setImageLoaded(true)
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [optimizedImageSrc, rawImageSrc])
 
   return (
     <article
@@ -126,12 +157,11 @@ const MirrorProductCard = ({ mirror, variant = 'default' }) => {
               />
             )}
             <img
+              key={currentImageSrc}
               src={currentImageSrc}
               alt={nombre}
               loading="lazy"
               decoding="async"
-              onLoad={() => setImageLoaded(true)}
-              onError={handleImageError}
               className={[
                 'h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105',
                 imageLoaded ? 'opacity-100' : 'opacity-0',
