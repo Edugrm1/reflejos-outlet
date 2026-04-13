@@ -39,7 +39,8 @@ const MirrorProductCard = ({ mirror, variant = 'default' }) => {
   const medidas = mirror.medidas ?? mirror.medida ?? mirror.size ?? '—'
   const precio = formatCurrency(mirror.precio ?? mirror.price)
   const imagenUrl = mirror.imagenUrl ?? mirror.imageUrl ?? ''
-  const imagenSrc = useMemo(() => optimizeCloudinaryUrl(imagenUrl), [imagenUrl])
+  const rawImageSrc = useMemo(() => (typeof imagenUrl === 'string' ? imagenUrl.trim() : ''), [imagenUrl])
+  const optimizedImageSrc = useMemo(() => optimizeCloudinaryUrl(imagenUrl), [imagenUrl])
   const waUrl = buildWhatsappUrl(nombre)
 
   const isEditorial = variant === 'editorial'
@@ -65,11 +66,22 @@ const MirrorProductCard = ({ mirror, variant = 'default' }) => {
   }
 
   /** Mientras llega la imagen desde Cloudinary */
-  const [imageLoaded, setImageLoaded] = useState(!imagenSrc)
+  const [imageLoaded, setImageLoaded] = useState(!optimizedImageSrc)
+  const [currentImageSrc, setCurrentImageSrc] = useState(optimizedImageSrc)
 
   useEffect(() => {
-    setImageLoaded(!imagenSrc)
-  }, [imagenSrc])
+    setCurrentImageSrc(optimizedImageSrc)
+    setImageLoaded(!optimizedImageSrc)
+  }, [optimizedImageSrc])
+
+  const handleImageError = () => {
+    if (currentImageSrc !== rawImageSrc && rawImageSrc) {
+      setCurrentImageSrc(rawImageSrc)
+      setImageLoaded(false)
+      return
+    }
+    setImageLoaded(true)
+  }
 
   return (
     <article
@@ -105,7 +117,7 @@ const MirrorProductCard = ({ mirror, variant = 'default' }) => {
             {favorite ? <HeartFilled /> : <HeartOutline />}
           </span>
         </button>
-        {imagenSrc ? (
+        {currentImageSrc ? (
           <>
             {!imageLoaded && (
               <div
@@ -114,12 +126,12 @@ const MirrorProductCard = ({ mirror, variant = 'default' }) => {
               />
             )}
             <img
-              src={imagenSrc}
+              src={currentImageSrc}
               alt={nombre}
               loading="lazy"
               decoding="async"
               onLoad={() => setImageLoaded(true)}
-              onError={() => setImageLoaded(true)}
+              onError={handleImageError}
               className={[
                 'h-full w-full object-cover transition duration-500 ease-out group-hover:scale-105',
                 imageLoaded ? 'opacity-100' : 'opacity-0',

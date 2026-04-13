@@ -97,15 +97,29 @@ const ProductDetail = () => {
     }
   }, [id])
 
-  const mainSrc = useMemo(() => {
+  const rawMainSrc = useMemo(() => {
     if (!product) return ''
-    const raw = product.imagenUrl ?? product.imageUrl ?? ''
-    return raw ? optimizeCloudinaryUrl(raw) : ''
+    return String(product.imagenUrl ?? product.imageUrl ?? '').trim()
   }, [product])
+  const optimizedMainSrc = useMemo(() => optimizeCloudinaryUrl(rawMainSrc), [rawMainSrc])
+  const [mainSrc, setMainSrc] = useState(optimizedMainSrc)
+
+  useEffect(() => {
+    setMainSrc(optimizedMainSrc)
+  }, [optimizedMainSrc])
 
   useEffect(() => {
     setMainLoaded(false)
   }, [mainSrc])
+
+  const handleMainImageError = () => {
+    if (mainSrc !== rawMainSrc && rawMainSrc) {
+      setMainSrc(rawMainSrc)
+      setMainLoaded(false)
+      return
+    }
+    setMainLoaded(true)
+  }
 
   const nombre = product?.nombre ?? product?.name ?? 'Espejo'
   const categoriaRaw = product?.categoria ?? product?.category ?? 'otros'
@@ -246,10 +260,11 @@ const ProductDetail = () => {
                         className={`relative z-[1] h-full w-full object-cover transition-opacity duration-300 ${
                           mainLoaded ? 'opacity-100' : 'opacity-0'
                         }`}
-                        loading="lazy"
+                        loading="eager"
+                        fetchPriority="high"
                         decoding="async"
                         onLoad={() => setMainLoaded(true)}
-                        onError={() => setMainLoaded(true)}
+                        onError={handleMainImageError}
                       />
                     </>
                   ) : (
