@@ -15,6 +15,14 @@ const navLinkClass = ({ isActive }) =>
       : 'border-transparent font-medium text-black dark:text-zinc-100',
   ].join(' ')
 
+const mobileNavLinkClass = ({ isActive }) =>
+  [
+    'block rounded-lg px-3 py-2.5 text-sm transition-colors',
+    isActive
+      ? 'bg-emerald-50 font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300'
+      : 'text-neutral-700 hover:bg-neutral-100 dark:text-zinc-200 dark:hover:bg-zinc-800',
+  ].join(' ')
+
 /**
  * Barra de navegación:
  * - Público: Inicio, Nosotros, Catálogo (+ Iniciar sesión si no hay usuario).
@@ -136,41 +144,44 @@ const NavBar = () => {
         {mobileOpen && (
           <nav
             id="mobile-menu"
-            className="mt-4 space-y-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:hidden"
+            className="mt-4 rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm dark:border-zinc-700 dark:bg-zinc-900 sm:hidden"
           >
-            <NavLink to="/" end className={navLinkClass}>
-              Inicio
-            </NavLink>
-            <NavLink to="/nosotros" className={navLinkClass}>
-              Nosotros
-            </NavLink>
-            <NavLink to="/catalogo" className={navLinkClass}>
-              Catálogo
-            </NavLink>
-
-            {showUserMenu && (
-              <NavLink to="/favoritos" className={navLinkClass}>
-                Favoritos
+            <div className="space-y-1">
+              <NavLink to="/" end className={mobileNavLinkClass}>
+                Inicio
               </NavLink>
-            )}
-
-            {showPublicAuth && (
-              <NavLink to="/login" className={navLinkClass}>
-                Iniciar sesión
+              <NavLink to="/nosotros" className={mobileNavLinkClass}>
+                Nosotros
               </NavLink>
-            )}
+              <NavLink to="/catalogo" className={mobileNavLinkClass}>
+                Catálogo
+              </NavLink>
+
+              {showUserMenu && (
+                <NavLink to="/favoritos" className={mobileNavLinkClass}>
+                  Favoritos
+                </NavLink>
+              )}
+
+              {showPublicAuth && (
+                <NavLink to="/login" className={mobileNavLinkClass}>
+                  Iniciar sesión
+                </NavLink>
+              )}
+            </div>
 
             {showUserMenu && (
               <>
+                <div className="my-3 border-t border-neutral-200 dark:border-zinc-700" />
                 {isAdmin && (
                   <NavLink
                     to="/admin"
                     className={({ isActive }) =>
                       [
-                        'block text-sm border-b-2 pb-0.5 transition-colors',
+                        'block rounded-lg px-3 py-2.5 text-sm transition-colors',
                         isActive
-                          ? 'border-emerald-600 font-bold text-emerald-800 dark:border-emerald-400 dark:text-emerald-300'
-                          : 'border-transparent font-medium text-neutral-500 hover:text-neutral-800 dark:text-zinc-400 dark:hover:text-zinc-200',
+                          ? 'bg-emerald-50 font-semibold text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300'
+                          : 'text-neutral-700 hover:bg-neutral-100 dark:text-zinc-200 dark:hover:bg-zinc-800',
                       ].join(' ')
                     }
                   >
@@ -181,7 +192,7 @@ const NavBar = () => {
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="block text-sm font-medium text-neutral-600 transition-colors hover:text-rose-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-2 rounded-sm dark:text-zinc-400 dark:hover:text-rose-400 dark:focus-visible:ring-rose-500/50"
+                  className="mt-1 block w-full rounded-lg px-3 py-2.5 text-left text-sm font-medium text-neutral-700 transition-colors hover:bg-rose-50 hover:text-rose-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-300 focus-visible:ring-offset-2 dark:text-zinc-200 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 dark:focus-visible:ring-rose-500/50"
                 >
                   Cerrar sesión
                 </button>
