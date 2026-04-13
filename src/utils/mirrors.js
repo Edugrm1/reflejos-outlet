@@ -8,11 +8,12 @@
  */
 export function optimizeCloudinaryUrl(url) {
   if (!url || typeof url !== 'string') return ''
-  const trimmed = url.trim()
+  const trimmed = url.trim().replace(/\s/g, '%20')
   if (!trimmed) return ''
-  if (!trimmed.includes('res.cloudinary.com')) return trimmed
-  if (trimmed.includes('f_auto,q_auto') || /\/upload\/f_auto/.test(trimmed)) return trimmed
-  return trimmed.replace(/\/upload\//, '/upload/f_auto,q_auto/')
+  const secure = trimmed.replace(/^http:\/\//i, 'https://')
+  if (!secure.includes('res.cloudinary.com')) return secure
+  if (secure.includes('f_auto,q_auto') || /\/upload\/f_auto/.test(secure)) return secure
+  return secure.replace(/\/upload\//, '/upload/f_auto,q_auto/')
 }
 
 export const formatCurrency = (value) => {
